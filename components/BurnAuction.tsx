@@ -1,25 +1,31 @@
 import React, { useState } from 'react';
-import { TOP_BURNERS } from '../constants';
 import { Tooltip } from './Tooltip';
-import { BaseProps } from '../types';
+import { BaseProps, Burner } from '../types';
 
-export const BurnAuction: React.FC<BaseProps> = ({ onInteract, walletConnected }) => {
+interface BurnAuctionProps extends BaseProps {
+  burners: Burner[];
+  onBurn: (amount: number) => void;
+}
+
+export const BurnAuction: React.FC<BurnAuctionProps> = ({ onInteract, walletConnected, burners, onBurn }) => {
   const [burnAmount, setBurnAmount] = useState('');
-  const currentLeader = TOP_BURNERS[0];
+  const currentLeader = burners[0];
 
   const handleBid = () => {
     if (!walletConnected) {
       onInteract('error', 'Connect Wallet', 'You must connect your wallet to bid.');
       return;
     }
-    if (!burnAmount || parseInt(burnAmount) <= currentLeader.amount) {
+    const amountVal = parseInt(burnAmount);
+    if (!burnAmount || isNaN(amountVal) || amountVal <= currentLeader.amount) {
       onInteract('error', 'Invalid Bid', `Bid must be higher than ${currentLeader.amount}`);
       return;
     }
 
     onInteract('loading', 'Burning Tokens...', 'Interacting with burn contract.');
     setTimeout(() => {
-      onInteract('success', 'Bid Placed!', `You burned ${burnAmount} tokens. You are now the leader.`);
+      onBurn(amountVal);
+      onInteract('success', 'Bid Placed!', `You burned ${amountVal} tokens. You are now the leader.`);
       setBurnAmount('');
     }, 2000);
   };
@@ -68,7 +74,7 @@ export const BurnAuction: React.FC<BaseProps> = ({ onInteract, walletConnected }
           <span className="text-[10px] text-gray-500">Last 24h</span>
         </h3>
         <ul className="space-y-3">
-          {TOP_BURNERS.map((burner) => (
+          {burners.map((burner) => (
             <li key={burner.rank} className="flex justify-between items-center text-sm border-b border-white/5 pb-2 last:border-0 group">
               <div className="flex items-center gap-3">
                 <span className={`flex items-center justify-center w-6 h-6 rounded-full font-bold text-xs shadow-lg ${

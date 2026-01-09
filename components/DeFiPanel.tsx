@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { LINKS } from '../constants';
 import { BaseProps } from '../types';
-import { ArrowDownUp, Wallet, ExternalLink, Lock, Unlock, ArrowUpCircle, ArrowDownCircle, AlertTriangle, X, Settings } from 'lucide-react';
+import { ArrowDownUp, Wallet, ExternalLink, Lock, Unlock, ArrowUpCircle, ArrowDownCircle, AlertTriangle, X, Settings, Link as LinkIcon } from 'lucide-react';
 
 export const DeFiPanel: React.FC<BaseProps> = ({ onInteract, walletConnected }) => {
   const [activeMode, setActiveMode] = useState<'swap' | 'vault'>('swap');
@@ -281,13 +281,20 @@ export const DeFiPanel: React.FC<BaseProps> = ({ onInteract, walletConnected }) 
               >
                 {walletConnected ? (swapSide === 'buy' ? 'Swap ETH to $thewclubbiggs' : 'Swap $thewclubbiggs to ETH') : 'Connect Wallet'}
               </button>
+
+              <a 
+                href={LINKS.phantom} 
+                target="_blank" 
+                rel="noreferrer" 
+                className="w-full bg-[#AB9FF2]/10 text-[#AB9FF2] border border-[#AB9FF2]/50 hover:bg-[#AB9FF2]/20 font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition"
+              >
+                Buy on Phantom
+                <ExternalLink size={16} />
+              </a>
               
-              <div className="mt-4 pt-4 border-t border-white/5 flex gap-2 justify-center">
-                <a href={LINKS.phantom} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs text-gray-400 hover:text-white transition">
-                  <ExternalLink size={12} /> Phantom
-                </a>
+              <div className="pt-2 border-t border-white/5 flex gap-2 justify-center">
                 <a href={LINKS.zoraCoin} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs text-gray-400 hover:text-white transition">
-                  <ExternalLink size={12} /> Zora
+                  <ExternalLink size={12} /> View on Zora
                 </a>
               </div>
             </div>
@@ -344,15 +351,21 @@ export const DeFiPanel: React.FC<BaseProps> = ({ onInteract, walletConnected }) 
 
                  <button 
                     onClick={openVaultConfirmation}
-                    className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-500 transition"
+                    className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-500 transition mb-4"
                  >
                    {walletConnected 
                       ? (vaultAction === 'deposit' ? 'Deposit to Index' : 'Redeem Assets') 
                       : 'Connect Wallet'}
                  </button>
-              </div>
-              <div className="text-center">
-                <a href={LINKS.glider} target="_blank" rel="noreferrer" className="text-xs text-gray-500 hover:text-white underline">View Portfolio on Glider.fi</a>
+
+                 <a 
+                   href={LINKS.glider} 
+                   target="_blank" 
+                   rel="noreferrer" 
+                   className="w-full bg-gray-800 border border-white/10 hover:bg-gray-700 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition"
+                 >
+                   <LinkIcon size={16} /> View ETF Portfolio on Glider.fi
+                 </a>
               </div>
             </div>
           )}

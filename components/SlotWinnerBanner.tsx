@@ -1,10 +1,12 @@
 import React from 'react';
-import { TOP_BURNERS } from '../constants';
+import { Burner } from '../types';
 import { Tooltip } from './Tooltip';
 
-export const SlotWinnerBanner: React.FC = () => {
-  const winner = TOP_BURNERS[0];
-  
+interface SlotWinnerBannerProps {
+  winner: Burner;
+}
+
+export const SlotWinnerBanner: React.FC<SlotWinnerBannerProps> = ({ winner }) => {
   return (
     <div className="w-full bg-gradient-to-r from-purple-900 via-blue-900 to-purple-900 bg-[length:200%_200%] animate-gradient-x border-b border-white/20 p-3 shadow-lg shadow-purple-500/20 mb-6 rounded-lg relative overflow-visible group z-30">
       <div className="absolute inset-0 bg-white/5 group-hover:bg-white/10 transition pointer-events-none"></div>

@@ -10,9 +10,10 @@ import { DeFiPanel } from './components/DeFiPanel';
 import { SlotWinnerBanner } from './components/SlotWinnerBanner';
 import { TipJar } from './components/TipJar';
 import { LeaderboardPanel } from './components/LeaderboardPanel';
+import { GamesHub } from './components/GamesHub';
 import { ToastContainer } from './components/Toast';
-import { LINKS } from './constants';
-import { Notification, NotificationType } from './types';
+import { LINKS, TOP_BURNERS } from './constants';
+import { Notification, NotificationType, Burner } from './types';
 import { 
   Home, 
   Activity, 
@@ -27,17 +28,23 @@ import {
   ShoppingBag,
   Trophy,
   Wallet,
-  Loader2
+  Loader2,
+  Gamepad2,
+  Flame
 } from 'lucide-react';
 
 const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'earn' | 'play' | 'defi' | 'leaderboard'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'earn' | 'prediction' | 'games' | 'defi' | 'leaderboard' | 'auction'>('dashboard');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Simulated Wallet State
   const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [balance, setBalance] = useState(0);
   
+  // Auction State
+  const [burners, setBurners] = useState<Burner[]>(TOP_BURNERS);
+
   // Notification State
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
@@ -55,8 +62,27 @@ const App: React.FC = () => {
     setTimeout(() => {
       setIsConnecting(false);
       setIsWalletConnected(true);
+      setBalance(12500); // Mock starting balance
       triggerNotification('success', 'Wallet Connected', '0x123...89EF is now active');
     }, 1500);
+  };
+
+  const handleBurn = (amount: number) => {
+    const newBurner: Burner = {
+      username: 'You',
+      amount: amount,
+      rank: 1 // Temporarily rank 1, will resort below
+    };
+
+    // Add new burner, sort descending by amount, and re-assign ranks
+    const updatedList = [newBurner, ...burners]
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 10) // Keep top 10
+      .map((b, idx) => ({ ...b, rank: idx + 1 }));
+
+    setBurners(updatedList);
+    // Deduct balance simulation
+    setBalance(prev => Math.max(0, prev - amount));
   };
 
   // Props to pass to interactive components
@@ -71,15 +97,14 @@ const App: React.FC = () => {
         return (
           <div className="animate-in fade-in duration-500">
             {/* Slot Winner Banner - Top of Main Page */}
-            <SlotWinnerBanner />
+            <SlotWinnerBanner winner={burners[0]} />
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="space-y-6">
                 <Flywheel />
-                <StakingDashboard {...interactiveProps} />
               </div>
               <div className="space-y-6">
-                 <BurnAuction {...interactiveProps} />
+                 <StakingDashboard {...interactiveProps} />
                  <div className="bg-card-bg p-6 rounded-xl border border-white/5">
                     <h3 className="font-bold mb-4">Social Hub</h3>
                     <div className="flex flex-wrap gap-4">
@@ -106,12 +131,40 @@ const App: React.FC = () => {
              </div>
           </div>
         );
-      case 'play':
+      case 'prediction':
         return (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-500">
+          <div className="animate-in fade-in duration-500">
             <PredictionMarket {...interactiveProps} />
-            <BurnAuction {...interactiveProps} />
           </div>
+        );
+      case 'auction':
+        return (
+          <div className="max-w-3xl mx-auto animate-in fade-in duration-500 space-y-8 pt-4">
+             <div className="text-center">
+                <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600 mb-2">
+                  Promo Slot Auction
+                </h1>
+                <p className="text-gray-400">
+                  Burn $thewclubbiggs to hijack the homepage banner. The highest burner gets the throne.
+                </p>
+             </div>
+             
+             {/* Show what they are bidding for */}
+             <div className="opacity-80 scale-95 pointer-events-none">
+                <div className="text-center text-xs text-gray-500 mb-2 uppercase tracking-widest font-bold">--- Preview of Reward ---</div>
+                <SlotWinnerBanner winner={burners[0]} />
+             </div>
+
+             <BurnAuction 
+                burners={burners} 
+                onBurn={handleBurn} 
+                {...interactiveProps} 
+             />
+          </div>
+        );
+      case 'games':
+        return (
+           <GamesHub {...interactiveProps} />
         );
       case 'defi':
         return (
@@ -125,7 +178,7 @@ const App: React.FC = () => {
       case 'leaderboard':
         return (
           <div className="animate-in fade-in duration-500">
-            <LeaderboardPanel />
+            <LeaderboardPanel burners={burners} />
           </div>
         );
       default:
@@ -149,7 +202,7 @@ const App: React.FC = () => {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden absolute top-16 left-0 w-full bg-black/95 z-40 border-b border-white/10 p-4 space-y-4">
-             {['dashboard', 'earn', 'play', 'defi', 'leaderboard'].map((tab) => (
+             {['dashboard', 'earn', 'auction', 'prediction', 'games', 'defi', 'leaderboard'].map((tab) => (
                <button 
                 key={tab}
                 onClick={() => { setActiveTab(tab as any); setMobileMenuOpen(false); }}
@@ -191,16 +244,28 @@ const App: React.FC = () => {
                 <Users size={20} /> Quests & Earn
               </button>
               <button 
+                onClick={() => setActiveTab('auction')}
+                className={`flex items-center gap-3 w-full p-3 rounded-lg transition ${activeTab === 'auction' ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white'}`}
+              >
+                <Flame size={20} /> Promo Auction
+              </button>
+              <button 
+                onClick={() => setActiveTab('prediction')}
+                className={`flex items-center gap-3 w-full p-3 rounded-lg transition ${activeTab === 'prediction' ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white'}`}
+              >
+                <TrendingUp size={20} /> Markets
+              </button>
+              <button 
+                onClick={() => setActiveTab('games')}
+                className={`flex items-center gap-3 w-full p-3 rounded-lg transition ${activeTab === 'games' ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white'}`}
+              >
+                <Gamepad2 size={20} /> Arcade
+              </button>
+              <button 
                 onClick={() => setActiveTab('leaderboard')}
                 className={`flex items-center gap-3 w-full p-3 rounded-lg transition ${activeTab === 'leaderboard' ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white'}`}
               >
                 <Trophy size={20} /> Leaderboard
-              </button>
-              <button 
-                onClick={() => setActiveTab('play')}
-                className={`flex items-center gap-3 w-full p-3 rounded-lg transition ${activeTab === 'play' ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white'}`}
-              >
-                <Activity size={20} /> Prediction & Games
               </button>
               <button 
                 onClick={() => setActiveTab('defi')}
@@ -228,6 +293,19 @@ const App: React.FC = () => {
 
           {/* Main Content Area */}
           <div className="flex-1 overflow-y-auto relative">
+            {/* Header with Balance */}
+             <div className="sticky top-0 z-20 bg-dark-bg/80 backdrop-blur-md border-b border-white/5 px-4 md:px-8 py-3 flex justify-end">
+                {isWalletConnected ? (
+                    <div className="flex items-center gap-2 bg-white/5 hover:bg-white/10 transition border border-white/10 px-4 py-2 rounded-full cursor-pointer group">
+                        <div className="w-2 h-2 rounded-full bg-neon-green animate-pulse"></div>
+                        <span className="text-xs text-gray-400 uppercase font-bold group-hover:text-white">Balance:</span>
+                        <span className="text-neon-green font-mono font-bold text-sm">{balance.toLocaleString()} $thewclubbiggs</span>
+                    </div>
+                ) : (
+                    <div className="text-xs text-gray-500 font-mono">Wallet not connected</div>
+                )}
+             </div>
+
             <div className="p-4 md:p-8 max-w-7xl mx-auto pb-20">
                {renderContent()}
             </div>

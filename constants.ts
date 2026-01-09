@@ -7,6 +7,7 @@ export const ASSETS: Asset[] = [
   { ticker: 'BTC', name: 'Bitcoin', color: '#F7931A', description: 'The original decentralized cryptocurrency and digital store of value.' },
   { ticker: 'ETH', name: 'Ethereum', color: '#627EEA', description: 'The leading programmable blockchain and smart contract platform.' },
   { ticker: 'SOL', name: 'Solana', color: '#14F195', description: 'High-performance blockchain optimizing for speed and low costs.' },
+  { ticker: 'XRP', name: 'XRP', color: '#1BA4C8', description: 'Digital asset built for global payments and liquidity.' },
   { ticker: 'MORPHO', name: 'Morpho', color: '#00C8AA', description: 'Decentralized lending protocol optimizing yields via P2P matching.' },
   { ticker: 'VIRTUAL', name: 'Virtuals', color: '#4ADE80', description: 'Protocol for co-owning and interacting with AI agents.' },
   { ticker: 'BANKR', name: 'Bankr Coin', color: '#22C55E', description: 'Decentralized banking and yield aggregator protocol.' },
@@ -141,7 +142,7 @@ export const LEADERBOARD_VOLUME: LeaderboardItem[] = [
 ];
 
 export const LINKS = {
-  phantom: 'https://phantom.com/tokens/base/0xfaac6a5816f2734f231119c2cf0b16227ee83328',
+  phantom: 'https://phantom.com/tokens/base/0xfaac6a5816f2734f231119c2cf0b16227ee83328?referralId=hjc1mwd6uu',
   zoraCoin: 'https://zora.co/coin/base:0x69ccfacc8f90bbe4abf64110df1da45ab2f58526',
   zoraProfile: 'https://zora.co/@thewclubbiggs',
   merch: 'https://wclubbiggs.printify.me/',

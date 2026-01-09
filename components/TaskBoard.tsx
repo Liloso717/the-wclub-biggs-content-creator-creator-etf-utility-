@@ -2,19 +2,25 @@ import React, { useState } from 'react';
 import { MOCK_TASKS } from '../constants';
 import { Plus, Users } from 'lucide-react';
 import { Tooltip } from './Tooltip';
-import { BaseProps } from '../types';
+import { BaseProps, Task } from '../types';
 
 export const TaskBoard: React.FC<BaseProps> = ({ onInteract, walletConnected }) => {
+  const [tasks, setTasks] = useState<Task[]>(MOCK_TASKS);
   const [filter, setFilter] = useState<'all' | 'social' | 'bagworking' | 'community'>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [dailyClaimed, setDailyClaimed] = useState(false);
 
+  // Create Task Form State
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [newTaskReward, setNewTaskReward] = useState('');
+  const [newTaskUrl, setNewTaskUrl] = useState('');
+
   const filteredTasks = filter === 'all' 
-    ? MOCK_TASKS.filter(t => t.type !== 'daily') // Show daily separately
-    : MOCK_TASKS.filter(t => t.type === filter);
+    ? tasks.filter(t => t.type !== 'daily') // Show daily separately
+    : tasks.filter(t => t.type === filter);
 
   // Filter for active community tasks for the showcase
-  const activeCommunityTasks = MOCK_TASKS.filter(t => t.type === 'community' && !t.isCompleted);
+  const activeCommunityTasks = tasks.filter(t => t.type === 'community' && !t.isCompleted);
 
   const handleClaim = () => {
     if (!walletConnected) {
@@ -29,8 +35,33 @@ export const TaskBoard: React.FC<BaseProps> = ({ onInteract, walletConnected }) 
   }
 
   const handleCreateTask = () => {
+     if (!walletConnected) {
+       onInteract('error', 'Connect Wallet', 'You must connect your wallet to create a task.');
+       return;
+     }
+     if (!newTaskTitle || !newTaskReward) {
+       onInteract('error', 'Missing Information', 'Please provide a title and reward amount.');
+       return;
+     }
+
+     const newTask: Task = {
+       id: Date.now().toString(),
+       title: newTaskTitle,
+       reward: `${newTaskReward} $thewclubbiggs`,
+       type: 'community',
+       actionUrl: newTaskUrl || '#',
+       isCompleted: false,
+       creator: 'You'
+     };
+
+     setTasks(prev => [newTask, ...prev]);
      onInteract('success', 'Task Created', 'Your community task is now live!');
      setShowCreateModal(false);
+     
+     // Reset Form
+     setNewTaskTitle('');
+     setNewTaskReward('');
+     setNewTaskUrl('');
   }
 
   return (
@@ -188,27 +219,55 @@ export const TaskBoard: React.FC<BaseProps> = ({ onInteract, walletConnected }) 
         ))}
       </div>
 
-      {/* Mock Create Task Modal */}
+      {/* Create Task Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
           <div className="bg-card-bg border border-white/20 rounded-xl p-6 w-full max-w-md shadow-2xl animate-in zoom-in-95">
             <h3 className="text-xl font-bold mb-4">Post Community Task</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Task Title</label>
-                <input type="text" className="w-full bg-black border border-white/10 rounded p-2 text-white" placeholder="e.g. Retweet my art" />
+                <input 
+                  type="text" 
+                  value={newTaskTitle}
+                  onChange={(e) => setNewTaskTitle(e.target.value)}
+                  className="w-full bg-black border border-white/10 rounded p-2 text-white focus:border-neon-green outline-none" 
+                  placeholder="e.g. Retweet my art" 
+                />
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Reward Amount ($thewclubbiggs)</label>
-                <input type="number" className="w-full bg-black border border-white/10 rounded p-2 text-white" placeholder="50" />
+                <input 
+                  type="number" 
+                  value={newTaskReward}
+                  onChange={(e) => setNewTaskReward(e.target.value)}
+                  className="w-full bg-black border border-white/10 rounded p-2 text-white focus:border-neon-green outline-none" 
+                  placeholder="50" 
+                />
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Link / Proof URL</label>
-                <input type="text" className="w-full bg-black border border-white/10 rounded p-2 text-white" placeholder="https://..." />
+                <input 
+                  type="text" 
+                  value={newTaskUrl}
+                  onChange={(e) => setNewTaskUrl(e.target.value)}
+                  className="w-full bg-black border border-white/10 rounded p-2 text-white focus:border-neon-green outline-none" 
+                  placeholder="https://..." 
+                />
               </div>
               <div className="pt-2 flex gap-2">
-                <button onClick={() => setShowCreateModal(false)} className="flex-1 bg-gray-800 text-white py-2 rounded font-bold hover:bg-gray-700">Cancel</button>
-                <button onClick={handleCreateTask} className="flex-1 bg-neon-green text-black py-2 rounded font-bold hover:bg-green-400">Post Task</button>
+                <button 
+                  onClick={() => setShowCreateModal(false)} 
+                  className="flex-1 bg-gray-800 text-white py-2 rounded font-bold hover:bg-gray-700 transition"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleCreateTask} 
+                  className="flex-1 bg-neon-green text-black py-2 rounded font-bold hover:bg-green-400 transition shadow-[0_0_15px_rgba(57,255,20,0.4)]"
+                >
+                  Post Task
+                </button>
               </div>
             </div>
           </div>

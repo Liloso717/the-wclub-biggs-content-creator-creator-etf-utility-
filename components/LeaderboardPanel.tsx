@@ -8,6 +8,7 @@ import {
 } from '../constants';
 import { Trophy, Timer, BarChart3, Wallet, Flame } from 'lucide-react';
 import { Tooltip } from './Tooltip';
+import { Burner } from '../types';
 
 interface LeaderboardSectionProps {
   title: string;
@@ -65,7 +66,9 @@ const LeaderboardSection: React.FC<LeaderboardSectionProps> = ({ title, icon, da
   </div>
 );
 
-export const LeaderboardPanel: React.FC = () => {
+export const LeaderboardPanel: React.FC<{ burners?: Burner[] }> = ({ burners }) => {
+  const currentBurners = burners || TOP_BURNERS;
+
   return (
     <div className="space-y-6">
       <div className="text-center mb-8">
@@ -127,7 +130,7 @@ export const LeaderboardPanel: React.FC = () => {
             <LeaderboardSection 
               title="Top Promoters (Most Burned)" 
               icon={<Flame />} 
-              data={TOP_BURNERS} 
+              data={currentBurners} 
               color="red-500" 
             />
           </div>
